@@ -1,12 +1,10 @@
-    .task-card {
-      margin-bottom: 1rem;
-    }
+    .task-card { margin-bottom: 1rem; }
     body.dark-mode {
       background-color: #121212;
       color: #fff;
     }
     body.dark-mode .card {
-      background-color: #1f1f1f;
+      background-color: #2e2e2e;
       color: #fff;
     }
     .switch-container {
