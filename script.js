@@ -2,6 +2,7 @@
   const taskList = document.getElementById('taskList');
   const pagination = document.getElementById('pagination');
   const statusFilter = document.getElementById('statusFilter');
+  const searchInput = document.getElementById('searchInput');
   const darkSwitch = document.getElementById('darkSwitch');
   const taskPriority = document.getElementById('taskPriority');
 
@@ -14,12 +15,29 @@
 
   const saveTasks = () => localStorage.setItem('tasks', JSON.stringify(tasks));
 
+  function formatDate(date) {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = d.toLocaleString('en', { month: 'short' });
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
   const renderTasks = () => {
     const scrollY = window.scrollY;
-
     taskList.innerHTML = '';
+
     const filter = statusFilter.value;
-    const filteredTasks = tasks.filter(task => filter === 'all' || task.status === filter);
+    const searchQuery = searchInput.value.trim().toLowerCase();
+
+    const filteredTasks = tasks.filter(task =>
+      (filter === 'all' || task.status === filter) &&
+      (
+        task.title.toLowerCase().includes(searchQuery) ||
+        task.from.toLowerCase().includes(searchQuery)
+      )
+    );
+
     const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
     const start = (currentPage - 1) * tasksPerPage;
     const currentTasks = filteredTasks.slice(start, start + tasksPerPage);
@@ -32,19 +50,18 @@
       cardBody.className = 'card-body';
       cardBody.innerHTML = `
         <h5 class="card-title">${task.title}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Dari: ${task.from}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Assigned by: ${task.from}</h6>
         <p class="card-text">
           <span class="description" id="desc-${realIndex}">${task.desc || '-'}</span>
           ${task.desc && task.desc.split('\n').length > 2 ? 
             `<a href="#" class="read-more-link" data-index="${realIndex}">Read More</a>` : ''}
         </p>
-        <p>Prioritas: <strong>${task.priority}</strong></p>
+        <p>Priority: <strong>${task.priority}</strong></p>
         <p>Status: <strong>${task.status}</strong></p>
-        <p>Mulai: ${task.startDate}</p>
-        <p>Selesai: ${task.endDate || '-'}</p>
+        <p>Start: <strong>${formatDate(task.startDate)}</strong> Finish: <strong>${task.endDate ? formatDate(task.endDate) : '-'}</strong></p>
         <button class="btn btn-warning btn-sm me-2" onclick="editTask(${realIndex})">Edit</button>
-        <button class="btn btn-danger btn-sm me-2" onclick="deleteTask(${realIndex})">Hapus</button>
-        ${task.status === 'On Progress' ? `<button class="btn btn-success btn-sm" onclick="markDone(${realIndex})">Selesai</button>` : ''}
+        <button class="btn btn-danger btn-sm me-2" onclick="deleteTask(${realIndex})">Delete</button>
+        ${task.status === 'On Progress' ? `<button class="btn btn-success btn-sm" onclick="markDone(${realIndex})">Completed</button>` : ''}
       `;
       card.appendChild(cardBody);
       taskList.appendChild(card);
@@ -166,6 +183,11 @@
   });
 
   statusFilter.addEventListener('change', () => {
+    currentPage = 1;
+    renderTasks();
+  });
+
+  searchInput.addEventListener('input', () => {
     currentPage = 1;
     renderTasks();
   });

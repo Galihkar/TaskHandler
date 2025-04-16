@@ -7,6 +7,9 @@
       background-color: #2e2e2e;
       color: #fff;
     }
+    body.dark-mode .card-subtitle {
+      color: #ccc !important;
+    }
     .switch-container {
       display: flex;
       justify-content: end;
